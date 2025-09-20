@@ -1,4 +1,4 @@
-from controller import Controller, ButtonKind
+from controller import ControllerInterface, ButtonKind, Controller
 from typing import Final, Dict, List
 import pygame.locals
 
@@ -18,23 +18,17 @@ default_keymap : PygameKeyMap = {
     ButtonKind.Y      : [pygame.locals.K_c]
 }
 
-class PygameController (Controller):
-    def __init__ (self, keymap : PygameKeyMap = default_keymap, long : int = 2):
+class PygameControllerInterface (ControllerInterface):
+    def __init__ (self, keymap : PygameKeyMap):
         self.__keymap : Final[PygameKeyMap] = keymap
         self.__revmap : Final[Dict[PygameKeyType, ButtonKind]] = {
             key : button for (button, keys) in self.__keymap.items()
                          for key in keys}
-        self.__long   : Final[int] = long
+        self.__state  : list[int] = PygameControllerInterface.emptyState()
         self.__close  : bool = False
-        self.__state  : List[int] = [0 for _ in ButtonKind]
 
-    def poll (self) -> None:
+    def poll (self) -> list[int]:
         self.__close = False
-
-        for i in range(len(self.__state)):
-            if self.__state[i] != 0:
-                self.__state[i] += 1
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.__close = True
@@ -44,24 +38,13 @@ class PygameController (Controller):
             elif event.type == pygame.KEYUP:
                 if event.key in self.__revmap:
                     self.__state[self.__revmap[event.key].value] = 0
+        return [x for x in self.__state]
 
     def shouldClose (self) -> bool:
-        return self.__close or self.isPressed(ButtonKind.Quit)
-
-    def getButtonPressedFrames (self, button : ButtonKind) -> int:
-        return self.__state[button.value]
+        return self.__close
 
     def getJoystick (self) -> tuple[float, float]:
-        up    : Final[int] = self.getButtonPressedFrames(ButtonKind.Up)
-        left  : Final[int] = self.getButtonPressedFrames(ButtonKind.Left)
-        right : Final[int] = self.getButtonPressedFrames(ButtonKind.Right)
-        down  : Final[int] = self.getButtonPressedFrames(ButtonKind.Down)
-        def value(item : int) -> float:
-            return min(item, self.__long) / self.__long
-        h : Final[float] = value(right) - value(left)
-        v : Final[float] = value(down) - value(up)
-        return (h, v)
+        return (0, 0)
 
-    @property
-    def longPressedFrames (self) -> int:
-        return self.__long
+def PygameController (keymap : PygameKeyMap = default_keymap, long : int = 2):
+    return Controller(PygameControllerInterface(default_keymap), long)

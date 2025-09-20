@@ -3,6 +3,7 @@ import sys, os
 root = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.append(os.path.join(root, "lib"))
 import hitbox
+from controller import ButtonKind
 from pygame_controller import PygameController
 
 class DrawHitboxVisitor (hitbox.HitboxVisitor):
@@ -15,10 +16,12 @@ class DrawHitboxVisitor (hitbox.HitboxVisitor):
     def acceptCircleHitbox (self, item : hitbox.CircleHitbox):
         pygame.draw.circle(self.__surface, self.__colour,
                           (item.cx, item.cy), item.r)
-    def acceptComplexHitbox (self, item : hitbox.ComplexHitbox):
-        pass
     def acceptAABBHitbox (self, item : hitbox.AABBHitbox):
         pass
+    def acceptSegmentHitbox (self, item : hitbox.SegmentHitbox):
+        pygame.draw.line(self.__surface, self.__colour,
+                         (item.x0, item.y0), (item.x1, item.y1),
+                         width = 2)
 
 def drawHitbox (item : hitbox.Hitbox, surface : pygame.Surface, colour : pygame.Color):
     visitor = DrawHitboxVisitor(surface, colour)
@@ -31,13 +34,21 @@ class Game:
         self.fps = fps
         pygame.display.set_caption("Pygame Example -- Collisions")
         self.controller : Final[PygameController] = PygameController()
-        self.main = hitbox.RectHitbox(0, 0, 50, 50)
+        self.__mains = [
+                hitbox.RectHitbox(0, 0, 50, 50),
+                hitbox.CircleHitbox(50, 50, 25),
+        ]
+        self.__main_i = 0
+        self.main = self.__mains[0]
         self.shapes = [
                 hitbox.RectHitbox(300, 100, 30, 30),
                 hitbox.RectHitbox(120, 30, 100, 100),
                 hitbox.CircleHitbox(300, 300, 30),
                 hitbox.CircleHitbox(400, 300, 15),
                 hitbox.CircleHitbox(600, 300, 60),
+                hitbox.SegmentHitbox(0, 500, 30, 550),
+                hitbox.SegmentHitbox(50, 400, 70, 500),
+                hitbox.SegmentHitbox(100, 450, 110, 460),
         ]
 
     def run(self):
@@ -59,6 +70,10 @@ class Game:
         x *= v
         y *= v
         self.main.move(x, y)
+
+        if self.controller.isShortPressed(ButtonKind.A):
+            self.__main_i = (self.__main_i + 1) % len(self.__mains)
+            self.main = self.__mains[self.__main_i]
 
     def draw (self):
         main_free = pygame.Color(128, 0, 0)
