@@ -12,3 +12,6 @@ wheels/
 /uv.lock
 /.python-version
 *.swp
+
+# Editor folders
+.idea/
