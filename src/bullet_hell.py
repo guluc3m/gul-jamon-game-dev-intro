@@ -1,7 +1,7 @@
 import pygame
 import sys, os
-root = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
-sys.path.append(os.path.join(root, "lib"))
+#root = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
+#sys.path.append(os.path.join(root, "lib")) -> Omitible tras instalar el proyecto
 import hitbox
 from controller import ButtonKind
 from pygame_controller import PygameController
@@ -14,7 +14,7 @@ MAX_ENEMY_BEAM_SPEED = 100  # px/second
 PLAYER_BEAM_SPEED = 500     # px/second
 PLAYER_SPEED = 200          # px/second
 ENEMY_MAX_HEALTH = 100
-PLAYER_COOLDOWN = 0.5
+PLAYER_COOLDOWN = 1
 
 class DrawHitboxVisitor (hitbox.HitboxVisitor):
     def __init__ (self, surface : pygame.Surface, colour : pygame.Color):
@@ -79,14 +79,23 @@ class Player:
     def hitbox (self) -> hitbox.Hitbox: return self.__hitbox
 
     def draw (self, surface : pygame.Surface):
+        if self.__cooldown > 0:
+            pygame.draw.circle(surface, pygame.Color(0, 255, 100),
+                               (self.__hitbox.cx, self.__hitbox.cy),
+                               self.__hitbox.r+2)
         pygame.draw.circle(surface, self.__colour,
                            (self.__hitbox.cx, self.__hitbox.cy),
                            self.__hitbox.r)
+        for i in range(self.__health):
+            pygame.draw.rect(surface, self.__colour,
+                             pygame.Rect((50+20*i, 500), (15, 10)))
+
 
     def move (self, x : float, y : float, dt : float):
         self.__hitbox.move(x * PLAYER_SPEED * dt, y * PLAYER_SPEED * dt)
         if self.__cooldown > 0:
-            self.__cooldown = max(0, self.__cooldown - dt)
+            self.__cooldown = 0 if self.__cooldown - dt <= 0 else self.__cooldown - dt
+
 
     def getBeams (self, dt : float) -> list[Beam]:
         beams = []
@@ -176,6 +185,9 @@ class Enemy:
         pygame.draw.rect(surface, self.__colour,
                          pygame.Rect((self.__hitbox.x, self.__hitbox.y),
                                      (self.__hitbox.w, self.__hitbox.h)))
+        for i in range(self.__health):
+            pygame.draw.rect(surface, self.__colour,
+                             pygame.Rect((200+i*4, 550), (4, 20)))
 
     def __circlePattern (self,
                          hitbox_maker,
@@ -271,6 +283,8 @@ class Game:
         pygame.quit()
 
     def update (self):
+        if self.player.health < 0 or self.enemy.health < 0:
+            pygame.quit()
         dt = 1 / self.fps
         self.player.move(*self.controller.getJoystick(), dt)
         self.ebeams += self.enemy.update(dt)
