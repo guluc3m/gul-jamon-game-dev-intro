@@ -1,12 +1,12 @@
-import pygame
-import sys, os
-#root = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
-#sys.path.append(os.path.join(root, "lib")) -> Omitible tras instalar el proyecto
-import hitbox
-from controller import ButtonKind
-from pygame_controller import PygameController
 import math
-from clock import Clock
+from typing import Final
+
+import pygame
+
+from guljamonlib import hitbox
+from guljamonlib.controller import ButtonKind
+from guljamonlib.pygame_controller import PygameController
+from guljamonlib.clock import Clock
 
 BEAMS_PER_SEC = 10
 BEAM_LENGTH = 4

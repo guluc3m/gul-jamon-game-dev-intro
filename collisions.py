@@ -1,10 +1,10 @@
+from typing import Final
+
 import pygame
-import sys, os
-#root = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
-#sys.path.append(os.path.join(root, "lib"))
-import hitbox
-from controller import ButtonKind
-from pygame_controller import PygameController
+
+from guljamonlib import hitbox
+from guljamonlib.controller import ButtonKind
+from guljamonlib.pygame_controller import PygameController
 
 class DrawHitboxVisitor (hitbox.HitboxVisitor):
     def __init__ (self, surface : pygame.Surface, colour : pygame.Color):

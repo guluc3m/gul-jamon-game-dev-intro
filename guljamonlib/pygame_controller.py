@@ -1,6 +1,7 @@
-from controller import ControllerInterface, ButtonKind, Controller
 from typing import Final, Dict, List
 import pygame.locals
+
+from guljamonlib.controller import ControllerInterface, ButtonKind, Controller
 
 type PygameKeyType = int
 type PygameKeyMap = Dict[ButtonKind, List[PygameKeyType]]
