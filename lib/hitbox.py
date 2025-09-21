@@ -41,7 +41,7 @@ class SegmentHitbox (Hitbox):
         self.__x0 += dx
         self.__y0 += dy
         self.__x1 += dx
-        self.__y1 += dx
+        self.__y1 += dy
 
     def __ccw(self, a : Point, b : Point, c : Point) -> bool:
         return (c[1] - a[1]) * (b[0] - a[0]) > (b[1] - a[1]) * (c[0] - a[0])
@@ -182,11 +182,48 @@ class RectHitbox (Hitbox):
         return False
 
 class AABBHitbox (Hitbox):
-    def __init__ (self, *args : List[Hitbox]):
-        self.__items : List[Hitbox]
+    def __init__ (self, x : int, y : int, *args : List[Hitbox]):
+        self.__items : List[Hitbox] = []
+        self.__x : float = x
+        self.__y : float = y
+        mx = 0
+        my = 0
+        for arg in args:
+            mx = min(mx, args.x)
+            my = min(my, args.y)
+        for arg in args:
+            arg.move(-mx, -my)
+            self.__items.append(arg)
+        self.__items.sort(key = lambda arg : (arg.y, arg.x))
+
+    @property
+    def items (self) -> List[Hitbox]:
+        return self.__items
 
     def accept (self, visitor : HitboxVisitor) -> object:
         return visitor.acceptAABBHitbox(self)
+
+    def collide (self, hitbox : Hitbox) -> bool:
+        # TODO: Binary search
+        for x in self.__items:
+            if x.collide(hitbox):
+                return True
+        return False
+
+    @property
+    def x (self) -> float:
+        return self.__x
+
+    @property
+    def y (self) -> float:
+        return self.__y
+
+    @property
+    def move (self, dx : float, dy : float) -> NoReturn:
+        self.__x += dx
+        self.__y += dy
+        for item in self.__items:
+            item.move(dx, dy)
 
 # Visitors
 
