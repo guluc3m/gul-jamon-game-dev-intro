@@ -39,6 +39,9 @@ class Controller:
         self.__prev : list[int] = ControllerInterface.emptyState()
         self.__curr : list[int] = ControllerInterface.emptyState()
 
+    @property
+    def internal (self): return self.__internal
+
     def poll (self):
         curr = self.__internal.poll()
         self.__prev = self.__curr

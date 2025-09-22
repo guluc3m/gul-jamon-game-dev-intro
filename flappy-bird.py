@@ -1,6 +1,7 @@
 import pygame
 from guljamonlib.hitbox import RectHitbox, CircleHitbox
 from guljamonlib.pygame_controller import PygameController
+from guljamonlib.rpi_controller import RPiController
 from guljamonlib.controller import ButtonKind
 from guljamonlib.clock import Clock
 import random
@@ -61,7 +62,8 @@ class Game:
    def __init__ (self):
       pygame.init()
       self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-      self.controller = PygameController()
+      # self.controller = PygameController()
+      self.controller = RPiController("10.117.254.130")
       self.pipes = []
       self.next_pipe = 0
       r = 10

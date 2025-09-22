@@ -6,6 +6,7 @@ import pygame
 from guljamonlib import hitbox
 from guljamonlib.controller import ButtonKind
 from guljamonlib.pygame_controller import PygameController
+from guljamonlib.rpi_controller import RPiController
 from guljamonlib.clock import Clock
 
 BEAMS_PER_SEC = 10
@@ -255,14 +256,18 @@ class Enemy:
         self.__health -= 1
 
 class Game:
-    def __init__ (self, width : int, height : int, fps = 30):
+    def __init__ (self, width : int, height : int, controller, fps = 30):
         pygame.init()
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode((width, height))
         self.fps = fps
         pygame.display.set_caption("Pygame Example -- Bullet Hell")
-        self.controller : Final[PygameController] = PygameController()
+        self.controller_kind = controller
+        if controller == "rpi":
+            self.controller = RPiController("10.117.254.130")
+        else:
+            self.controller = PygameController()
         self.player = Player(x      = width // 2,
                              y      = height * 8 // 10,
                              screen = (width, height),
@@ -302,6 +307,9 @@ class Game:
                 self.player.damage()
                 del self.ebeams[i]
 
+        if self.controller_kind == "rpi":
+            self.controller.internal.setMessage(str(2**self.player.health-1))
+
     def draw (self):
         self.player.draw(self.screen)
         self.enemy.draw(self.screen)
@@ -311,5 +319,5 @@ class Game:
             beam.draw(self.screen)
 
 if __name__ == "__main__":
-    game = Game(800, 600, fps = 400)
+    game = Game(800, 600, "rpi", fps = 400)
     game.run()

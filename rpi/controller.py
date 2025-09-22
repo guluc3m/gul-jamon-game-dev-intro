@@ -22,13 +22,27 @@ Ground              (39)    (40)            GPIO 21 (PCM_DOUT)
 """
 
 from RPi import GPIO
+from gpiozero import LED
 
-BUTTON_A = 16       # GPIO 23
-BUTTON_B = 18       # GPIO 24
+GREEN_LED = 8
+YELLOW_LED = 10
+RED_LED = 12
+BUTTON = 38
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-if GPIO.input(16) == GPIO.HIGH:
-    print("Ok")
 
+GPIO.setup(GREEN_LED, GPIO.OUT)
+GPIO.setup(YELLOW_LED, GPIO.OUT)
+GPIO.setup(RED_LED, GPIO.OUT)
+GPIO.setup(BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+print("I'm ready")
+
+while True:
+   message = int(input())
+   GPIO.output(GREEN_LED,  GPIO.HIGH if message & 1 else GPIO.LOW) 
+   GPIO.output(YELLOW_LED, GPIO.HIGH if message & 2 else GPIO.LOW) 
+   GPIO.output(RED_LED,    GPIO.HIGH if message & 4 else GPIO.LOW) 
+   state = GPIO.input(BUTTON) == GPIO.HIGH
+   print(1 if state else 0)
 GPIO.cleanup()
